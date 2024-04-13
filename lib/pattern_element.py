@@ -1,6 +1,7 @@
 from enum import Enum
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
+from dataclasses import dataclass
 import copy
 
 class PatternMatchResult(Enum):
@@ -35,11 +36,11 @@ class PatternElement(ABC):
     def copy_element(self):
         return copy.deepcopy(self)
 
+@dataclass
 class FixedPatternElement(PatternElement):
     """Matches one specific datum."""
 
-    def __init__(self, datum: bytes):
-        self.datum = datum
+    datum: bytes
 
     def reset(self):
         # No state, nothing to do!
@@ -51,11 +52,13 @@ class FixedPatternElement(PatternElement):
         else:
             return PatternMatchResult.FAILURE
 
+@dataclass
 class SequencePatternElement(PatternElement):
     """Matches a sequence of different patterns, one after the other."""
 
-    def __init__(self, pattern_elements: List[PatternElement]):
-        self.pattern_elements = pattern_elements
+    pattern_elements: List[PatternElement]
+
+    def __post_init__(self):
         self.current_pattern_index = 0
 
         if len(self.pattern_elements) == 0:
@@ -88,15 +91,13 @@ class SequencePatternElement(PatternElement):
         elif result == PatternMatchResult.NEED_MORE:
             # Our current pattern needs more data, so we do too
             return PatternMatchResult.NEED_MORE
-            
+
+@dataclass            
 class NamePatternElement(PatternElement):
     """A pattern element which wraps another, assigning a name to it."""
 
     name: str
-
-    def __init__(self, name: str, pattern_element: PatternElement):
-        self.name = name
-        self.pattern_element = pattern_element
+    pattern_element: PatternElement
 
     def reset(self):
         self.pattern_element.reset()
