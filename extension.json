@@ -1,0 +1,13 @@
+{
+  "name": "Custom Data",
+  "apiVersion": "1.0.0",
+  "author": "Aaron Christiansen",
+  "version": "0.0.1",
+  "description": "Describe and annotate custom commands and data patterns",
+  "extensions": {
+    "CustomData": {
+      "type": "HighLevelAnalyzer",
+      "entryPoint": "HighLevelAnalyzer.Hla"
+    }
+  }
+}
