@@ -42,6 +42,18 @@ class Hla(HighLevelAnalyzer):
         The type and data values in `frame` will depend on the input analyzer.
         '''
 
+        # Find datum
+        # TODO: this is a bit naff, need a proper way!
+        if 'data' in frame.data:
+            # Async Serial
+            datum = frame.data['data']
+        elif 'mosi' in frame.data:
+            # SPI
+            # TODO: enable choosing between MOSI/MISO
+            datum = frame.data['mosi']
+        else:
+            return
+
         # Create a new candidate for each pattern template
         self.candidates.extend((p.copy_element(), frame.start_time) for p in self.pattern_templates)
 
@@ -50,7 +62,7 @@ class Hla(HighLevelAnalyzer):
         for candidate in [*self.candidates]:
             (pattern, start_time) = candidate
 
-            match_result = pattern.match(frame.data['data'])
+            match_result = pattern.match(datum)
             if match_result == PatternMatchResult.SUCCESS:
                 # This matched - store it in the list of matches so we can possibly make it into
                 # a frame later
