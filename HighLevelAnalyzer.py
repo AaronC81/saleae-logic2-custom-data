@@ -1,11 +1,13 @@
 # Logic2 doesn't re-import libraries when using the "Reload Extension" button.
 # Force that to happen manually.
-import lib.pattern_element
+import lib
 import importlib 
-importlib.reload(lib.pattern_element)
+importlib.reload(lib)
 
 from saleae.analyzers import HighLevelAnalyzer, AnalyzerFrame, StringSetting, NumberSetting, ChoicesSetting
 from lib.pattern_element import *
+from lib.pattern_tokenizer import Tokenizer
+from lib.pattern_parser import Parser
 
 class Hla(HighLevelAnalyzer):
     pattern_setting = StringSetting()
@@ -22,20 +24,12 @@ class Hla(HighLevelAnalyzer):
     }
 
     def __init__(self):
-        self.pattern_templates = [
-            NamePatternElement("Get Version",
-                SequencePatternElement([
-                    FixedPatternElement(b"\x01"),
-                    FixedPatternElement(b"\xFE"),
-                ])
-            ),
-            NamePatternElement("Get Chip ID",
-                SequencePatternElement([
-                    FixedPatternElement(b"\x02"),
-                    FixedPatternElement(b"\xFD"),
-                ])
-            ),
-        ]
+        # Parse input patterns
+        tokens = Tokenizer(self.pattern_setting).tokenize()
+        patterns = Parser(tokens).parse()
+
+        # Set up state
+        self.pattern_templates = patterns
         self.candidates = []
 
     pattern_templates: List[PatternElement]
