@@ -29,5 +29,15 @@ def test_parse_multiple():
         ])),
     ]
 
+def test_parse_wildcard():
+    assert parse("ab .. cd") == [
+        SequencePatternElement([
+            FixedPatternElement(b"\xAB"),
+            WildcardPatternElement(),
+            WildcardPatternElement(),
+            FixedPatternElement(b"\xCD"),
+        ]),
+    ]
+
 def parse(input: str):
     return Parser(Tokenizer(input).tokenize()).parse()

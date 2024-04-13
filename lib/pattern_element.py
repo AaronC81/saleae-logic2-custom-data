@@ -104,3 +104,13 @@ class NamePatternElement(PatternElement):
 
     def match(self, datum: bytes) -> PatternMatchResult:
         return self.pattern_element.match(datum)
+
+@dataclass
+class WildcardPatternElement(PatternElement):
+    """A pattern element which matches any one datum."""
+
+    def reset(self):
+        pass
+
+    def match(self, _datum: bytes) -> PatternMatchResult:
+        return PatternMatchResult.SUCCESS

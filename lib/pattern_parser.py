@@ -1,5 +1,5 @@
 from .pattern_tokenizer import *
-from .pattern_element import PatternElement, SequencePatternElement, NamePatternElement, FixedPatternElement
+from .pattern_element import PatternElement, SequencePatternElement, NamePatternElement, FixedPatternElement, WildcardPatternElement
 from dataclasses import dataclass
 from typing import List
 
@@ -65,6 +65,10 @@ class Parser:
 
             elif isinstance(token, DatumToken):
                 elements.append(FixedPatternElement(datum=self.datum_contents_to_bytes(token.contents)))
+                self.take()
+
+            elif isinstance(token, DotToken):
+                elements.append(WildcardPatternElement())
                 self.take()
 
             else:
