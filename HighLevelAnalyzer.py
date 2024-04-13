@@ -1,8 +1,12 @@
 # Logic2 doesn't re-import libraries when using the "Reload Extension" button.
 # Force that to happen manually.
-import lib
+import lib.pattern_element
+import lib.pattern_tokenizer
+import lib.pattern_parser
 import importlib 
-importlib.reload(lib)
+importlib.reload(lib.pattern_element)
+importlib.reload(lib.pattern_tokenizer)
+importlib.reload(lib.pattern_parser)
 
 from saleae.analyzers import HighLevelAnalyzer, AnalyzerFrame, StringSetting, NumberSetting, ChoicesSetting
 from lib.pattern_element import *
