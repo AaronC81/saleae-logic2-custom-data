@@ -14,7 +14,8 @@ from lib.pattern_tokenizer import Tokenizer
 from lib.pattern_parser import Parser
 
 class Hla(HighLevelAnalyzer):
-    pattern_setting = StringSetting()
+    source_setting = ChoicesSetting(label="Source", choices=("Text", "File"))
+    pattern_setting = StringSetting(label="Pattern (or file path)")
 
     # An optional list of types this analyzer produces, providing a way to customize the way frames are displayed in Logic 2.
     result_types = {
@@ -28,8 +29,16 @@ class Hla(HighLevelAnalyzer):
     }
 
     def __init__(self):
+        if self.source_setting == "Text":
+            pattern = self.pattern_setting
+        elif self.source_setting == "File":
+            with open(self.pattern_setting, "r") as f:
+                pattern = f.read()
+        else:
+            raise ValueError(f"unknown source: {self.source_setting}")
+
         # Parse input patterns
-        tokens = Tokenizer(self.pattern_setting).tokenize()
+        tokens = Tokenizer(pattern).tokenize()
         patterns = Parser(tokens).parse()
 
         # Set up state
