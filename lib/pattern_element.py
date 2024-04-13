@@ -71,7 +71,6 @@ class SequencePatternElement(PatternElement):
 
     def match(self, datum: bytes) -> PatternMatchResult:
         result = self.pattern_elements[self.current_pattern_index].match(datum)
-        
         if result == PatternMatchResult.SUCCESS:
             # Move onto the next pattern
             self.current_pattern_index += 1
@@ -81,10 +80,12 @@ class SequencePatternElement(PatternElement):
                 return PatternMatchResult.SUCCESS
             
             return PatternMatchResult.NEED_MORE
-        elif PatternMatchResult.FAILURE:
+        
+        elif result == PatternMatchResult.FAILURE:
             # This is a failure too
             return PatternMatchResult.FAILURE
-        elif PatternMatchResult.NEED_MORE:
+        
+        elif result == PatternMatchResult.NEED_MORE:
             # Our current pattern needs more data, so we do too
             return PatternMatchResult.NEED_MORE
             
