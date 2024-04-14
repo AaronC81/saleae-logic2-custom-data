@@ -54,5 +54,13 @@ def test_capture():
 
     assert e.captures == { "x": b"\x02\x03" }
 
+def test_start_hint():
+    assert FixedPatternElement(b"\x01").start_hint() == [b"\x01"]
+    assert SequencePatternElement([
+        FixedPatternElement(b"\x01"),
+        FixedPatternElement(b"\x02"),
+    ]).start_hint() == [b"\x01"]
+    assert WildcardPatternElement().start_hint() == None
+
 def env() -> PatternMatchEnvironment:
     return PatternMatchEnvironment()

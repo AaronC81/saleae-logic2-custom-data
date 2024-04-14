@@ -51,8 +51,20 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
         patterns = Parser(tokens).parse()
 
         # Set up state
-        self.pattern_templates = patterns
         self.candidates = []
+
+        # Set up lookup tables for creating patterns
+        self.pattern_templates_by_start_hint = {}
+        self.pattern_templates_without_start_hint = []
+        for pattern in patterns:
+            hints = pattern.start_hint()
+            if hints is None:
+                self.pattern_templates_without_start_hint.append(pattern)
+            else:
+                for hint in hints:
+                    if hint not in self.pattern_templates_by_start_hint:
+                        self.pattern_templates_by_start_hint[hint] = []
+                    self.pattern_templates_by_start_hint[hint].append(pattern)
 
     pattern_templates: List[PatternElement]
     candidates: List[Tuple[PatternElement, object]]
@@ -79,7 +91,7 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
         # Create a new candidate for each pattern template
         self.candidates.extend(
             PatternMatchCandidate(pattern=p.copy_element(), env=PatternMatchEnvironment(), start_time=frame.start_time)
-            for p in self.pattern_templates
+            for p in self.pattern_templates_by_start_hint.get(datum, []) + self.pattern_templates_without_start_hint
         )
 
         # Pipe datum into each candidate

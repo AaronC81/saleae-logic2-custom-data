@@ -44,6 +44,23 @@ class PatternElement(ABC):
         """
         ...
 
+    @abstractmethod
+    def start_hint(self) -> Optional[List[bytes]]:
+        """
+        Get the first matching possibilities for this pattern element.
+
+        This is for optimisation purposes, as it allows possibly relevant patterns to be selected
+        more quickly given new data.
+
+        If an item is in the returned list, then the first call to `match` with that item _must_
+        return either `PatternMatchResult.SUCCESS` or `PatternMatchResult.NEED_MORE`. Any items not
+        in the returned list would cause the first call to `match` to return
+        `PatternMatchResult.FAILURE`.
+
+        If `None`, the list of valid input items isn't defined for this pattern.
+        """
+        ...
+
     def copy_element(self):
         return copy.deepcopy(self)
 
@@ -62,6 +79,9 @@ class FixedPatternElement(PatternElement):
             return PatternMatchResult.SUCCESS
         else:
             return PatternMatchResult.FAILURE
+        
+    def start_hint(self) -> Optional[List[bytes]]:
+        return [self.datum]
 
 @dataclass
 class SequencePatternElement(PatternElement):
@@ -102,6 +122,9 @@ class SequencePatternElement(PatternElement):
         elif result == PatternMatchResult.NEED_MORE:
             # Our current pattern needs more data, so we do too
             return PatternMatchResult.NEED_MORE
+        
+    def start_hint(self) -> Optional[List[bytes]]:
+        return self.pattern_elements[0].start_hint()
 
 @dataclass            
 class NamePatternElement(PatternElement):
@@ -115,6 +138,9 @@ class NamePatternElement(PatternElement):
 
     def match(self, datum: bytes, env: PatternMatchEnvironment) -> PatternMatchResult:
         return self.pattern_element.match(datum, env)
+    
+    def start_hint(self) -> Optional[List[bytes]]:
+        return self.pattern_element.start_hint()
 
 @dataclass
 class WildcardPatternElement(PatternElement):
@@ -125,6 +151,9 @@ class WildcardPatternElement(PatternElement):
 
     def match(self, _datum: bytes, _env: PatternMatchEnvironment) -> PatternMatchResult:
         return PatternMatchResult.SUCCESS
+    
+    def start_hint(self) -> Optional[List[bytes]]:
+        return None
 
 @dataclass
 class CapturePatternElement(PatternElement):
@@ -152,4 +181,7 @@ class CapturePatternElement(PatternElement):
             env.add_capture(self.name, self.capture_buffer)
 
         return result
+    
+    def start_hint(self) -> Optional[List[bytes]]:
+        return self.pattern_element.start_hint()
         
