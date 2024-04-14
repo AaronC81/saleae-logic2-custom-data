@@ -1,8 +1,15 @@
 from enum import Enum
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
-from dataclasses import dataclass
+from typing import List, Optional, Tuple, Dict
+from dataclasses import dataclass, field
 import copy
+
+@dataclass
+class PatternMatchEnvironment:
+    captures: Dict[str, bytes] = field(default_factory=lambda: {})
+
+    def add_capture(self, name: str, data: bytes):
+        self.captures[name] = data
 
 class PatternMatchResult(Enum):
     # The provided data is not a match for this pattern.
@@ -25,11 +32,15 @@ class PatternElement(ABC):
         ...
 
     @abstractmethod
-    def match(self, datum: bytes) -> PatternMatchResult:
+    def match(self, datum: bytes, env: PatternMatchEnvironment) -> PatternMatchResult:
         """
         Try to match one datum, returning a result based on whether it matched.
         This may be a stateful method if multiple data are required for a match. If so, state
         should be maintained until `reset` is called.
+
+        Capturing pattern elements may modify the `env` *if and only if* the match returns
+        `PatternMatchResult.SUCCESS`. Matches shouldn't be modified incrementally, to prevent
+        clashes between multiple concurrent match candidates.
         """
         ...
 
@@ -46,7 +57,7 @@ class FixedPatternElement(PatternElement):
         # No state, nothing to do!
         pass
 
-    def match(self, datum: bytes) -> PatternMatchResult:
+    def match(self, datum: bytes, _env: PatternMatchEnvironment) -> PatternMatchResult:
         if self.datum == datum:
             return PatternMatchResult.SUCCESS
         else:
@@ -72,8 +83,8 @@ class SequencePatternElement(PatternElement):
         for pe in self.pattern_elements:
             pe.reset()
 
-    def match(self, datum: bytes) -> PatternMatchResult:
-        result = self.pattern_elements[self.current_pattern_index].match(datum)
+    def match(self, datum: bytes, env: PatternMatchEnvironment) -> PatternMatchResult:
+        result = self.pattern_elements[self.current_pattern_index].match(datum, env)
         if result == PatternMatchResult.SUCCESS:
             # Move onto the next pattern
             self.current_pattern_index += 1
@@ -102,8 +113,8 @@ class NamePatternElement(PatternElement):
     def reset(self):
         self.pattern_element.reset()
 
-    def match(self, datum: bytes) -> PatternMatchResult:
-        return self.pattern_element.match(datum)
+    def match(self, datum: bytes, env: PatternMatchEnvironment) -> PatternMatchResult:
+        return self.pattern_element.match(datum, env)
 
 @dataclass
 class WildcardPatternElement(PatternElement):
@@ -112,5 +123,33 @@ class WildcardPatternElement(PatternElement):
     def reset(self):
         pass
 
-    def match(self, _datum: bytes) -> PatternMatchResult:
+    def match(self, _datum: bytes, _env: PatternMatchEnvironment) -> PatternMatchResult:
         return PatternMatchResult.SUCCESS
+
+@dataclass
+class CapturePatternElement(PatternElement):
+    """A pattern element which captures the matched data, for use elsewhere in the pattern."""
+    
+    name: str
+    pattern_element: PatternElement
+
+    def __post_init__(self):
+        self.capture_buffer = bytes()
+
+    def reset(self):
+        self.capture_buffer = bytes()
+        self.pattern_element.reset()
+
+    def match(self, datum: bytes, env: PatternMatchEnvironment) -> PatternMatchResult:
+        result = self.pattern_element.match(datum, env)
+
+        # Push datum if it didn't cause a failure
+        if result == PatternMatchResult.SUCCESS or result == PatternMatchResult.NEED_MORE:
+            self.capture_buffer += datum
+
+        # If success, submit capture
+        if result == PatternMatchResult.SUCCESS:
+            env.add_capture(self.name, self.capture_buffer)
+
+        return result
+        

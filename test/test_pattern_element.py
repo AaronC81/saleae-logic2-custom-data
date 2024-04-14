@@ -1,8 +1,8 @@
-from ..lib.pattern_element import PatternMatchResult, FixedPatternElement, SequencePatternElement, WildcardPatternElement
+from ..lib.pattern_element import *
 
 def test_fixed():
-    assert FixedPatternElement(b"\x12").match(b"\x12") == PatternMatchResult.SUCCESS
-    assert FixedPatternElement(b"\x12").match(b"\xAB") == PatternMatchResult.FAILURE
+    assert FixedPatternElement(b"\x12").match(b"\x12", env()) == PatternMatchResult.SUCCESS
+    assert FixedPatternElement(b"\x12").match(b"\xAB", env()) == PatternMatchResult.FAILURE
 
 def test_sequence():
     seq = SequencePatternElement([
@@ -14,14 +14,14 @@ def test_sequence():
         FixedPatternElement(b"\x04"),
     ])
 
-    assert seq.match(b"\x01") == PatternMatchResult.NEED_MORE
-    assert seq.match(b"\x03") == PatternMatchResult.FAILURE
+    assert seq.match(b"\x01", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x03", env()) == PatternMatchResult.FAILURE
     seq.reset()
 
-    assert seq.match(b"\x01") == PatternMatchResult.NEED_MORE
-    assert seq.match(b"\x02") == PatternMatchResult.NEED_MORE
-    assert seq.match(b"\x03") == PatternMatchResult.NEED_MORE
-    assert seq.match(b"\x04") == PatternMatchResult.SUCCESS
+    assert seq.match(b"\x01", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x02", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x03", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x04", env()) == PatternMatchResult.SUCCESS
 
 def test_wildcard():
     seq = SequencePatternElement([
@@ -31,7 +31,28 @@ def test_wildcard():
         FixedPatternElement(b"\x04"),
     ])
 
-    assert seq.match(b"\x01") == PatternMatchResult.NEED_MORE
-    assert seq.match(b"\x02") == PatternMatchResult.NEED_MORE
-    assert seq.match(b"\x03") == PatternMatchResult.NEED_MORE
-    assert seq.match(b"\x04") == PatternMatchResult.SUCCESS
+    assert seq.match(b"\x01", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x02", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x03", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x04", env()) == PatternMatchResult.SUCCESS
+
+def test_capture():
+    seq = SequencePatternElement([
+        FixedPatternElement(b"\x01"),
+        CapturePatternElement("x", SequencePatternElement([
+            WildcardPatternElement(),
+            WildcardPatternElement(),
+        ])),
+        FixedPatternElement(b"\x04"),
+    ])
+
+    e = env()
+    assert seq.match(b"\x01", e) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x02", e) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x03", e) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x04", e) == PatternMatchResult.SUCCESS
+
+    assert e.captures == { "x": b"\x02\x03" }
+
+def env() -> PatternMatchEnvironment:
+    return PatternMatchEnvironment()
