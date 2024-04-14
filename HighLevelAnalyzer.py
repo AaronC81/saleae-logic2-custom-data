@@ -102,7 +102,9 @@ class Hla(HighLevelAnalyzer):
             matching_candidate = min(matches, key=lambda match: match.start_time)
 
             if isinstance(matching_candidate.pattern, NamePatternElement):
-                ty, data = "named", { "text": matching_candidate.pattern.name }
+                format_captures = { k: v.hex() for k, v in matching_candidate.env.captures.items() }
+                text = matching_candidate.pattern.name.format(**format_captures)
+                ty, data = "named", { "text": text }
             else:
                 ty, data = "unnamed", {}
 
