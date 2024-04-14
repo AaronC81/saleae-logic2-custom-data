@@ -39,5 +39,15 @@ def test_parse_wildcard():
         ]),
     ]
 
+def test_parse_capture():
+    assert parse("ab x:. y:. cd") == [
+        SequencePatternElement([
+            FixedPatternElement(b"\xAB"),
+            CapturePatternElement("x", WildcardPatternElement()),
+            CapturePatternElement("y", WildcardPatternElement()),
+            FixedPatternElement(b"\xCD"),
+        ]),
+    ]
+
 def parse(input: str):
     return Parser(Tokenizer(input).tokenize()).parse()

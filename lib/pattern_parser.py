@@ -1,5 +1,5 @@
 from .pattern_tokenizer import *
-from .pattern_element import PatternElement, SequencePatternElement, NamePatternElement, FixedPatternElement, WildcardPatternElement
+from .pattern_element import PatternElement, SequencePatternElement, NamePatternElement, FixedPatternElement, WildcardPatternElement, CapturePatternElement
 from dataclasses import dataclass
 from typing import List
 
@@ -62,19 +62,31 @@ class Parser:
             if isinstance(token, SemicolonToken):
                 # Bail - this sequence is over
                 break
-
-            elif isinstance(token, DatumToken):
-                elements.append(FixedPatternElement(datum=self.datum_contents_to_bytes(token.contents)))
-                self.take()
-
-            elif isinstance(token, DotToken):
-                elements.append(WildcardPatternElement())
-                self.take()
-
             else:
-                raise UnexpectedTokenError(token)
+                elements.append(self.parse_single_element())
             
         return SequencePatternElement(elements)
+    
+    def parse_single_element(self) -> PatternElement:
+        token = self.here()
+
+        if isinstance(token, DatumToken):
+            self.take()
+
+            # This might be a capture, if it's of the form `x:...` rather than just `x`
+            if not self.is_at_end() and isinstance(self.here(), ColonToken):
+                self.take()
+                captured_pattern = self.parse_single_element()
+                return CapturePatternElement(token.contents, captured_pattern)
+
+            return FixedPatternElement(datum=self.datum_contents_to_bytes(token.contents))
+
+        elif isinstance(token, DotToken):
+            self.take()
+            return WildcardPatternElement()
+        
+        else:
+            raise UnexpectedTokenError(token)
     
     def datum_contents_to_bytes(self, contents: str) -> bytes:
         try:

@@ -16,6 +16,7 @@ class QuotedStringToken(Token):
 class SemicolonToken(Token): pass
 class EqualsToken(Token): pass
 class DotToken(Token): pass
+class ColonToken(Token): pass
 
 class UnexpectedEndError(Exception): pass
 
@@ -48,10 +49,12 @@ class Tokenizer:
                 tokens.append(EqualsToken(position=self.range_to_here_from(start_pos)))
             elif self.take_if("."):
                 tokens.append(DotToken(position=self.range_to_here_from(start_pos)))
+            elif self.take_if(":"):
+                tokens.append(ColonToken(position=self.range_to_here_from(start_pos)))
 
             elif self.here().isalnum():
                 buffer = ""
-                while not self.is_at_end() and self.here().isalnum():
+                while not self.is_at_end() and (self.here().isalnum() or self.here() == '_'):
                     buffer += self.take()
                 tokens.append(DatumToken(contents=buffer, position=self.range_to_here_from(start_pos)))
 
