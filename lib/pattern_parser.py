@@ -33,7 +33,7 @@ class Parser:
                 elements.append(self.parse_named())
 
             elif isinstance(token, DatumToken):
-                elements.append(self.parse_body())
+                elements.append(self.parse_body(end_delimiter=SemicolonToken))
 
             else:
                 raise UnexpectedTokenError(token)
@@ -49,17 +49,17 @@ class Parser:
         if not isinstance(eq, EqualsToken):
             return UnexpectedTokenError(eq)
         
-        body = self.parse_body()
+        body = self.parse_body(end_delimiter=SemicolonToken)
 
         return NamePatternElement(name=name.contents, pattern_element=body)
 
-    def parse_body(self) -> SequencePatternElement:
+    def parse_body(self, end_delimiter) -> SequencePatternElement:
         elements = []
 
         while not self.is_at_end():
             token = self.here()
 
-            if isinstance(token, SemicolonToken):
+            if isinstance(token, end_delimiter):
                 # Bail - this sequence is over
                 break
             else:
@@ -84,6 +84,13 @@ class Parser:
         elif isinstance(token, DotToken):
             self.take()
             return WildcardPatternElement()
+        
+        elif isinstance(token, LParenToken):
+            self.take()
+            body = self.parse_body(end_delimiter=RParenToken)
+            if not self.is_at_end():
+                self.take() # Consume RParen
+            return body
         
         else:
             raise UnexpectedTokenError(token)

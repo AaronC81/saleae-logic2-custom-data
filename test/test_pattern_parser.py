@@ -49,5 +49,18 @@ def test_parse_capture():
         ]),
     ]
 
+def test_parse_subpattern():
+    assert parse("ab x:(..) cd") == [
+        SequencePatternElement([
+            FixedPatternElement(b"\xAB"),
+            CapturePatternElement("x", SequencePatternElement([
+                WildcardPatternElement(),
+                WildcardPatternElement(),
+            ])),
+            FixedPatternElement(b"\xCD"),
+        ]),
+    ]
+
+
 def parse(input: str):
     return Parser(Tokenizer(input).tokenize()).parse()

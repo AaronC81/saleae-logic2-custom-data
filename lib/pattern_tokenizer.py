@@ -17,6 +17,8 @@ class SemicolonToken(Token): pass
 class EqualsToken(Token): pass
 class DotToken(Token): pass
 class ColonToken(Token): pass
+class LParenToken(Token): pass
+class RParenToken(Token): pass
 
 class UnexpectedEndError(Exception): pass
 
@@ -51,6 +53,11 @@ class Tokenizer:
                 tokens.append(DotToken(position=self.range_to_here_from(start_pos)))
             elif self.take_if(":"):
                 tokens.append(ColonToken(position=self.range_to_here_from(start_pos)))
+            elif self.take_if("("):
+                tokens.append(LParenToken(position=self.range_to_here_from(start_pos)))
+            elif self.take_if(")"):
+                tokens.append(RParenToken(position=self.range_to_here_from(start_pos)))
+
 
             elif self.here().isalnum():
                 buffer = ""
