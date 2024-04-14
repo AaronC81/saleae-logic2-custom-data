@@ -13,6 +13,12 @@ from lib.pattern_element import *
 from lib.pattern_tokenizer import Tokenizer
 from lib.pattern_parser import Parser
 
+@dataclass
+class PatternMatchCandidate:
+    pattern: PatternElement
+    env: PatternMatchEnvironment
+    start_time: object
+
 class Hla(HighLevelAnalyzer):
     source_setting = ChoicesSetting(label="Source", choices=("Text", "File"))
     pattern_setting = StringSetting(label="Pattern (or file path)")
@@ -68,19 +74,19 @@ class Hla(HighLevelAnalyzer):
             return
 
         # Create a new candidate for each pattern template
-        self.candidates.extend((p.copy_element(), frame.start_time) for p in self.pattern_templates)
+        self.candidates.extend(
+            PatternMatchCandidate(pattern=p.copy_element(), env=PatternMatchEnvironment(), start_time=frame.start_time)
+            for p in self.pattern_templates
+        )
 
         # Pipe datum into each candidate
         matches = []
         for candidate in [*self.candidates]:
-            (pattern, start_time) = candidate
-
-            match_result = pattern.match(datum)
+            match_result = candidate.pattern.match(datum, candidate.env)
             if match_result == PatternMatchResult.SUCCESS:
                 # This matched - store it in the list of matches so we can possibly make it into
                 # a frame later
-                matches.append((pattern, start_time))
-
+                matches.append(candidate)
                 self.candidates.remove(candidate)
             elif match_result == PatternMatchResult.FAILURE:
                 # No match - remove it
@@ -93,11 +99,11 @@ class Hla(HighLevelAnalyzer):
             # Find the "longest" match, and create a frame for that one.
             # (Discard the other matches, if they existed.)
             # TODO: more control over what to do?
-            matching_pattern, matching_start_time = min(matches, key=lambda match: match[1])
+            matching_candidate = min(matches, key=lambda match: match.start_time)
 
-            if isinstance(matching_pattern, NamePatternElement):
-                ty, data = "named", { "text": matching_pattern.name }
+            if isinstance(matching_candidate.pattern, NamePatternElement):
+                ty, data = "named", { "text": matching_candidate.pattern.name }
             else:
                 ty, data = "unnamed", {}
 
-            return AnalyzerFrame(ty, matching_start_time, frame.end_time, data)
+            return AnalyzerFrame(ty, matching_candidate.start_time, frame.end_time, data)
