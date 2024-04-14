@@ -19,7 +19,7 @@ class PatternMatchCandidate:
     env: PatternMatchEnvironment
     start_time: object
 
-class Hla(HighLevelAnalyzer):
+class CustomDataAnalyzer(HighLevelAnalyzer):
     source_setting = ChoicesSetting(label="Source", choices=("Text", "File"))
     pattern_setting = StringSetting(label="Pattern (or file path)")
 

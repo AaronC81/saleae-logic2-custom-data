@@ -7,7 +7,7 @@
   "extensions": {
     "CustomData": {
       "type": "HighLevelAnalyzer",
-      "entryPoint": "HighLevelAnalyzer.Hla"
+      "entryPoint": "custom_data_analyzer.CustomDataAnalyzer"
     }
   }
 }
