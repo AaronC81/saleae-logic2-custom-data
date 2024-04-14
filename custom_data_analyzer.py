@@ -3,15 +3,18 @@
 import lib.pattern_element
 import lib.pattern_tokenizer
 import lib.pattern_parser
+import lib.byte_formatter
 import importlib 
 importlib.reload(lib.pattern_element)
 importlib.reload(lib.pattern_tokenizer)
 importlib.reload(lib.pattern_parser)
+importlib.reload(lib.byte_formatter)
 
 from saleae.analyzers import HighLevelAnalyzer, AnalyzerFrame, StringSetting, NumberSetting, ChoicesSetting
 from lib.pattern_element import *
 from lib.pattern_tokenizer import Tokenizer
 from lib.pattern_parser import Parser
+from lib.byte_formatter import ByteFormatter
 
 @dataclass
 class PatternMatchCandidate:
@@ -102,7 +105,7 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
             matching_candidate = min(matches, key=lambda match: match.start_time)
 
             if isinstance(matching_candidate.pattern, NamePatternElement):
-                format_captures = { k: v.hex() for k, v in matching_candidate.env.captures.items() }
+                format_captures = { k: ByteFormatter(data=v) for k, v in matching_candidate.env.captures.items() }
                 text = matching_candidate.pattern.name.format(**format_captures)
                 ty, data = "named", { "text": text }
             else:
