@@ -1,5 +1,5 @@
 from ..data import SaleaeTime
-from typing import Dict, Mapping, Optional, List
+from typing import Dict, Mapping, Optional, List, Union
 
 class AnalyzerFrame:
     type: str
@@ -10,7 +10,7 @@ class AnalyzerFrame:
     def __init__(self, type: str, start_time: SaleaeTime, end_time: SaleaeTime, data: Mapping[str, object]): ...
 
 class HighLevelAnalyzer:
-    def decode(self, frame: AnalyzerFrame) -> Optional[AnalyzerFrame | List[AnalyzerFrame]]: ...
+    def decode(self, frame: AnalyzerFrame) -> Optional[Union[AnalyzerFrame, List[AnalyzerFrame]]]: ...
 
 class Setting:
     label: Optional[str]

@@ -16,7 +16,7 @@ importlib.reload(lib.pattern_parser)
 importlib.reload(lib.byte_formatter)
 importlib.reload(lib.data_extractor)
 
-from typing import cast, Dict, List, Optional
+from typing import cast, Dict, List, Optional, Union
 from dataclasses import dataclass
 
 from saleae.analyzers import HighLevelAnalyzer, AnalyzerFrame, StringSetting, NumberSetting, ChoicesSetting
@@ -95,7 +95,7 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
     pattern_templates_by_start_hint: Dict[bytes, List[PatternElement]]
     pattern_templates_without_start_hint: List[PatternElement]
 
-    def decode(self, frame: AnalyzerFrame) -> Optional[AnalyzerFrame | List[AnalyzerFrame]]:
+    def decode(self, frame: AnalyzerFrame) -> Optional[Union[AnalyzerFrame, List[AnalyzerFrame]]]:
         '''
         Process a frame from the input analyzer, and optionally return a single `AnalyzerFrame` or a list of `AnalyzerFrame`s.
 
