@@ -1,34 +1,7 @@
 from dataclasses import dataclass
 from typing import List
-
-@dataclass
-class Token:
-    position: range
-
-@dataclass
-class DatumToken(Token):
-    contents: str
-
-@dataclass
-class QuotedStringToken(Token):
-    contents: str
-
-class SemicolonToken(Token): pass
-class EqualsToken(Token): pass
-class DotToken(Token): pass
-class ColonToken(Token): pass
-class LParenToken(Token): pass
-class RParenToken(Token): pass
-
-class UnexpectedEndError(Exception): pass
-
-@dataclass
-class UnexpectedCharacterError(Exception):
-    char: str
-    position: int
-
-class UnterminatedQuotedStringError(Exception): pass
-
+from .pattern_tokens import *
+from .errors import *
 
 class Tokenizer:
     def __init__(self, input: str):
