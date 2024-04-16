@@ -16,6 +16,8 @@ importlib.reload(lib.pattern_parser)
 importlib.reload(lib.byte_formatter)
 importlib.reload(lib.data_extractor)
 
+from typing import cast
+
 from saleae.analyzers import HighLevelAnalyzer, AnalyzerFrame, StringSetting, NumberSetting, ChoicesSetting
 from saleae.data import SaleaeTime
 
@@ -34,7 +36,7 @@ class PatternMatchCandidate:
 
 class CustomDataAnalyzer(HighLevelAnalyzer):
     input_analyzer_type = ChoicesSetting(label="Input Analyzer Type", choices=[t.value for t in InputAnalyzerType])
-    source_setting = ChoicesSetting(label="Pattern Source", choices=("Text", "File"))
+    source_setting = ChoicesSetting(label="Pattern Source", choices=["Text", "File"])
     pattern_setting = StringSetting(label="Pattern or File Path")
 
     # An optional list of types this analyzer produces, providing a way to customize the way frames are displayed in Logic 2.
@@ -84,7 +86,7 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
                     self.pattern_templates_by_start_hint[hint].append(pattern)
 
     pattern_templates: List[PatternElement]
-    candidates: List[Tuple[PatternElement, object]]
+    candidates: List[PatternMatchCandidate]
 
     def decode(self, frame: AnalyzerFrame):
         '''
@@ -94,7 +96,7 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
         '''
 
         # Find datum
-        datum = extract_datum_from_frame(self.input_analyzer_type, frame)
+        datum = extract_datum_from_frame(cast(str, self.input_analyzer_type), frame)
         if datum is None:
             return
         

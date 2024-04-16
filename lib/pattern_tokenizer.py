@@ -9,7 +9,7 @@ class Tokenizer:
         self.current_position = 0
 
     def tokenize(self) -> List[Token]:
-        tokens = []
+        tokens: List[Token] = []
 
         while not self.is_at_end():
             # Skip whitespace
@@ -51,7 +51,7 @@ class Tokenizer:
                 tokens.append(QuotedStringToken(contents=buffer, position=self.range_to_here_from(start_pos)))
 
             else:
-                raise UnexpectedCharacterError(char=self.here(), position=self.current_position)
+                raise UnexpectedCharacterError(char=self.here(), position=self.range_to_here_from(self.current_position))
             
         return tokens
 

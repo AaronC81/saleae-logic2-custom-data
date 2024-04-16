@@ -1,6 +1,6 @@
 from enum import Enum
 from saleae.analyzers import AnalyzerFrame
-from typing import Optional
+from typing import Optional, cast
 from .errors import CustomException
 
 class InputAnalyzerType(str, Enum):
@@ -17,14 +17,17 @@ def extract_datum_from_frame(ty: str, frame: AnalyzerFrame) -> Optional[bytes]:
 
     try:
         if ty == InputAnalyzerType.ASYNC_SERIAL.value:
-            return frame.data["data"]
+            return cast(bytes, frame.data["data"])
         elif ty == InputAnalyzerType.SPI_MOSI.value:
             if frame.type == "result":
-                return frame.data["mosi"]
+                return cast(bytes, frame.data["mosi"])
         elif ty == InputAnalyzerType.SPI_MISO.value:
             if frame.type == "result":
-                return frame.data["miso"]
+                return cast(bytes, frame.data["miso"])
         else:
             raise ValueError(f"unknown input type '{ty}'")
     except KeyError as e:
         raise CustomException.from_analyzer_data_error(e, frame.data, ty)
+
+    # Data was found, but isn't relevant
+    return None

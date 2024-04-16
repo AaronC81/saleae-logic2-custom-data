@@ -1,11 +1,13 @@
 from ..data import SaleaeTime
-from typing import Dict, Optional, List
+from typing import Dict, Mapping, Optional, List
 
 class AnalyzerFrame:
     type: str
-    data: Dict[str, object]
     start_time: SaleaeTime
     end_time: SaleaeTime
+    data: Dict[str, object]
+
+    def __init__(self, type: str, start_time: SaleaeTime, end_time: SaleaeTime, data: Mapping[str, object]): ...
 
 class HighLevelAnalyzer:
     def decode(self, frame: AnalyzerFrame): ...

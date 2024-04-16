@@ -123,6 +123,9 @@ class SequencePatternElement(PatternElement):
             # Our current pattern needs more data, so we do too
             return PatternMatchResult.NEED_MORE
         
+        else:
+            raise ValueError(f"unknown result: {result}")
+        
     def start_hint(self) -> Optional[List[bytes]]:
         return self.pattern_elements[0].start_hint()
 

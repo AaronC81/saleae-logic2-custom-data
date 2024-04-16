@@ -11,7 +11,7 @@ class Parser:
         self.current_position = 0
 
     def parse(self) -> List[PatternElement]:
-        elements = []
+        elements: List[PatternElement] = []
 
         while not self.is_at_end():
             token = self.here()
@@ -27,7 +27,7 @@ class Parser:
                 elements.append(self.parse_body(end_delimiter=SemicolonToken))
 
             else:
-                raise UnexpectedTokenError(token=token, position=self.current_position)
+                raise UnexpectedTokenError(token=token, position=token.position)
         
         return elements
     
@@ -84,7 +84,7 @@ class Parser:
             return body
         
         else:
-            raise UnexpectedTokenError(token=token, position=self.current_position)
+            raise UnexpectedTokenError(token=token, position=token.position)
     
     def datum_contents_to_bytes(self, token: DatumToken) -> bytes:
         try:
