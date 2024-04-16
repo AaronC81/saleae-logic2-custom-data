@@ -11,6 +11,8 @@ importlib.reload(lib.pattern_parser)
 importlib.reload(lib.byte_formatter)
 
 from saleae.analyzers import HighLevelAnalyzer, AnalyzerFrame, StringSetting, NumberSetting, ChoicesSetting
+from saleae.data import SaleaeTime
+
 from lib.pattern_element import *
 from lib.pattern_tokenizer import Tokenizer
 from lib.pattern_parser import Parser
@@ -20,7 +22,7 @@ from lib.byte_formatter import ByteFormatter
 class PatternMatchCandidate:
     pattern: PatternElement
     env: PatternMatchEnvironment
-    start_time: object
+    start_time: SaleaeTime
 
 class CustomDataAnalyzer(HighLevelAnalyzer):
     source_setting = ChoicesSetting(label="Source", choices=("Text", "File"))
