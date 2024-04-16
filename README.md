@@ -99,3 +99,11 @@ The following formatting specifiers (usable with e.g. `{x:L}`) are supported:
   Longer words will not work; shorter words are untested but might be OK?
 
 - Underlying protocols (e.g. Async Serial, SPI) must be individually supported, and few are yet!
+
+## Development
+
+This follows the standard Saleae HLA template, with some notable additions:
+
+- There is a suite of unit tests, runnable with `pytest`.
+- I've written some "good enough for VS Code" types for the `saleae` module, in the `typings`
+  directory.
