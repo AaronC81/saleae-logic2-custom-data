@@ -8,7 +8,7 @@ import copy
 class PatternMatchEnvironment:
     captures: Dict[str, bytes] = field(default_factory=lambda: {})
 
-    def add_capture(self, name: str, data: bytes):
+    def add_capture(self, name: str, data: bytes) -> None:
         self.captures[name] = data
 
 class PatternMatchResult(Enum):
@@ -27,7 +27,7 @@ class PatternElement(ABC):
     """An abstract class describing how one datum of a packet should be matched."""
 
     @abstractmethod
-    def reset(self):
+    def reset(self) -> None:
         """Forget all match state and start again."""
         ...
 
@@ -61,7 +61,7 @@ class PatternElement(ABC):
         """
         ...
 
-    def copy_element(self):
+    def copy_element(self) -> "PatternElement":
         return copy.deepcopy(self)
 
 @dataclass
@@ -70,7 +70,7 @@ class FixedPatternElement(PatternElement):
 
     datum: bytes
 
-    def reset(self):
+    def reset(self) -> None:
         # No state, nothing to do!
         pass
 
@@ -89,13 +89,13 @@ class SequencePatternElement(PatternElement):
 
     pattern_elements: List[PatternElement]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.current_pattern_index = 0
 
         if len(self.pattern_elements) == 0:
             raise ValueError("empty pattern list is not allowed")
         
-    def reset(self):
+    def reset(self) -> None:
         # Revert to the first pattern element
         self.current_pattern_index = 0
 
@@ -136,7 +136,7 @@ class NamePatternElement(PatternElement):
     name: str
     pattern_element: PatternElement
 
-    def reset(self):
+    def reset(self) -> None:
         self.pattern_element.reset()
 
     def match(self, datum: bytes, env: PatternMatchEnvironment) -> PatternMatchResult:
@@ -149,7 +149,7 @@ class NamePatternElement(PatternElement):
 class WildcardPatternElement(PatternElement):
     """A pattern element which matches any one datum."""
 
-    def reset(self):
+    def reset(self) -> None:
         pass
 
     def match(self, _datum: bytes, _env: PatternMatchEnvironment) -> PatternMatchResult:
@@ -165,10 +165,10 @@ class CapturePatternElement(PatternElement):
     name: str
     pattern_element: PatternElement
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.capture_buffer = bytes()
 
-    def reset(self):
+    def reset(self) -> None:
         self.capture_buffer = bytes()
         self.pattern_element.reset()
 

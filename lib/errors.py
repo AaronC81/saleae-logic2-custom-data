@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Dict
 from .pattern_tokens import Token
 
 from abc import ABC, abstractmethod
@@ -77,13 +77,13 @@ class CustomException(Exception):
         return CustomException(message)
     
     @staticmethod
-    def from_analyzer_data_error(e: KeyError, data: dict, input_analyzer_type: str) -> "CustomException":
+    def from_analyzer_data_error(e: KeyError, data: Dict[str, object], input_analyzer_type: str) -> "CustomException":
         """Creates a `CustomException` when input data could not be processed."""
 
         return CustomException(f"Could not read data from analyzer. You have selected the analyzer type '{input_analyzer_type}', double-check this is correct. (Details: missing {e} on {data})")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.message
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.message

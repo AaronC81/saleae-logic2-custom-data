@@ -6,7 +6,7 @@ class ByteFormatter:
 
     data: bytes
 
-    def __format__(self, spec):
+    def __format__(self, spec: str) -> str:
         # Convention here is that lowercase options change formatting, while uppercase options
         # change how the data is actually interpreted.
 

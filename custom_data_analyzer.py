@@ -16,7 +16,8 @@ importlib.reload(lib.pattern_parser)
 importlib.reload(lib.byte_formatter)
 importlib.reload(lib.data_extractor)
 
-from typing import cast
+from typing import cast, Dict, List, Optional
+from dataclasses import dataclass
 
 from saleae.analyzers import HighLevelAnalyzer, AnalyzerFrame, StringSetting, NumberSetting, ChoicesSetting
 from saleae.data import SaleaeTime
@@ -50,16 +51,19 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
         },
     }
 
-    def __init__(self):
-        if self.source_setting == "Text":
+    def __init__(self) -> None:
+        source_setting = cast(str, self.source_setting)
+        pattern_setting = cast(str, self.pattern_setting)
+
+        if source_setting == "Text":
             source_name = "<text>"
-            pattern = self.pattern_setting
-        elif self.source_setting == "File":
-            source_name = self.pattern_setting
-            with open(self.pattern_setting, "r") as f:
+            pattern = pattern_setting
+        elif source_setting == "File":
+            source_name = pattern_setting
+            with open(pattern_setting, "r") as f:
                 pattern = f.read()
         else:
-            raise ValueError(f"unknown source: {self.source_setting}")
+            raise ValueError(f"unknown source: {source_setting}")
 
         # Parse input patterns
         try:
@@ -75,20 +79,23 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
         # Set up lookup tables for creating patterns
         self.pattern_templates_by_start_hint = {}
         self.pattern_templates_without_start_hint = []
-        for pattern in patterns:
-            hints = pattern.start_hint()
+        for pat in patterns:
+            hints = pat.start_hint()
             if hints is None:
-                self.pattern_templates_without_start_hint.append(pattern)
+                self.pattern_templates_without_start_hint.append(pat)
             else:
                 for hint in hints:
                     if hint not in self.pattern_templates_by_start_hint:
                         self.pattern_templates_by_start_hint[hint] = []
-                    self.pattern_templates_by_start_hint[hint].append(pattern)
+                    self.pattern_templates_by_start_hint[hint].append(pat)
 
     pattern_templates: List[PatternElement]
     candidates: List[PatternMatchCandidate]
 
-    def decode(self, frame: AnalyzerFrame):
+    pattern_templates_by_start_hint: Dict[bytes, List[PatternElement]]
+    pattern_templates_without_start_hint: List[PatternElement]
+
+    def decode(self, frame: AnalyzerFrame) -> Optional[AnalyzerFrame | List[AnalyzerFrame]]:
         '''
         Process a frame from the input analyzer, and optionally return a single `AnalyzerFrame` or a list of `AnalyzerFrame`s.
 
@@ -98,7 +105,7 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
         # Find datum
         datum = extract_datum_from_frame(cast(str, self.input_analyzer_type), frame)
         if datum is None:
-            return
+            return None
         
         # Create a new candidate for each pattern template
         self.candidates.extend(
@@ -151,6 +158,8 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
                 ty, data = "unnamed", {}
 
             return AnalyzerFrame(ty, matching_candidate.start_time, frame.end_time, data)
+        
+        return None
 
 
     

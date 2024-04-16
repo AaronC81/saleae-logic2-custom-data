@@ -44,7 +44,7 @@ class Parser:
 
         return NamePatternElement(name=name.contents, pattern_element=body)
 
-    def parse_body(self, end_delimiter) -> SequencePatternElement:
+    def parse_body(self, end_delimiter: type) -> SequencePatternElement:
         elements = []
 
         while not self.is_at_end():

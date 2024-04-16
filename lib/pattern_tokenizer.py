@@ -51,11 +51,11 @@ class Tokenizer:
                 tokens.append(QuotedStringToken(contents=buffer, position=self.range_to_here_from(start_pos)))
 
             else:
-                raise UnexpectedCharacterError(char=self.here(), position=self.range_to_here_from(self.current_position))
+                raise UnexpectedCharacterError(char=self.here(), position=self.range_to_here_from(start_pos))
             
         return tokens
 
-    def skip_whitespace(self):
+    def skip_whitespace(self) -> None:
         while not self.is_at_end() and self.here().isspace():
             self.take()
 
@@ -86,5 +86,5 @@ class Tokenizer:
     
         return self.input[self.current_position]
 
-    def range_to_here_from(self, start_pos) -> range:
+    def range_to_here_from(self, start_pos: int) -> range:
         return range(start_pos, self.current_position)
