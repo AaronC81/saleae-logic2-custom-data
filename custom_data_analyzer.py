@@ -21,6 +21,7 @@ from lib.pattern_element import *
 from lib.pattern_tokenizer import Tokenizer
 from lib.pattern_parser import Parser
 from lib.byte_formatter import ByteFormatter
+from lib.errors import SourceError, CustomException
 
 @dataclass
 class PatternMatchCandidate:
@@ -45,16 +46,22 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
 
     def __init__(self):
         if self.source_setting == "Text":
+            source_name = "<text>"
             pattern = self.pattern_setting
         elif self.source_setting == "File":
+            source_name = self.pattern_setting
             with open(self.pattern_setting, "r") as f:
                 pattern = f.read()
         else:
             raise ValueError(f"unknown source: {self.source_setting}")
 
         # Parse input patterns
-        tokens = Tokenizer(pattern).tokenize()
-        patterns = Parser(tokens).parse()
+        try:
+            tokens = Tokenizer(pattern).tokenize()
+            patterns = Parser(tokens).parse()
+        except SourceError as e:
+            # Throw another exception with the info presented nicely
+            raise CustomException.from_syntax_error(e, source_name, pattern)
 
         # Set up state
         self.candidates = []

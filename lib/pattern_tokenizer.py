@@ -45,7 +45,7 @@ class Tokenizer:
 
                 # Consume closing quote
                 if self.is_at_end():
-                    raise UnterminatedQuotedStringError()
+                    raise UnterminatedQuotedStringError(position=None)
                 self.take() 
 
                 tokens.append(QuotedStringToken(contents=buffer, position=self.range_to_here_from(start_pos)))
@@ -82,7 +82,7 @@ class Tokenizer:
         """Return the current character from the input, without changing it."""
 
         if self.is_at_end():
-            raise UnexpectedEndError()
+            raise UnexpectedEndError(position=None)
     
         return self.input[self.current_position]
 
