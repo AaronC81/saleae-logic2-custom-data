@@ -1,10 +1,14 @@
 # Logic2 doesn't re-import libraries when using the "Reload Extension" button.
 # Force that to happen manually.
+import lib.pattern_tokens 
+import lib.errors
 import lib.pattern_element
 import lib.pattern_tokenizer
 import lib.pattern_parser
 import lib.byte_formatter
-import importlib 
+import importlib
+importlib.reload(lib.pattern_tokens)
+importlib.reload(lib.errors)
 importlib.reload(lib.pattern_element)
 importlib.reload(lib.pattern_tokenizer)
 importlib.reload(lib.pattern_parser)
