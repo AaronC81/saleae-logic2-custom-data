@@ -80,7 +80,7 @@ The following formatting specifiers (usable with e.g. `{x:L}`) are supported:
 - _Nothing_: Render as packed hex: `abcdef1234`
 - `S`: Render as **s**paced hex: `ab cd ef 12 34`
 - `L`: Interpret bytes as an unsigned **l**ittle-endian integer
-- `B`: Interpret bytes as an unsigned **b**ittle-endian integer
+- `B`: Interpret bytes as an unsigned **b**ig-endian integer
 
 ## Limitations
 
