@@ -6,6 +6,7 @@ import lib.pattern_element
 import lib.pattern_tokenizer
 import lib.pattern_parser
 import lib.byte_formatter
+import lib.data_extractor
 import importlib
 importlib.reload(lib.pattern_tokens)
 importlib.reload(lib.errors)
@@ -13,6 +14,7 @@ importlib.reload(lib.pattern_element)
 importlib.reload(lib.pattern_tokenizer)
 importlib.reload(lib.pattern_parser)
 importlib.reload(lib.byte_formatter)
+importlib.reload(lib.data_extractor)
 
 from saleae.analyzers import HighLevelAnalyzer, AnalyzerFrame, StringSetting, NumberSetting, ChoicesSetting
 from saleae.data import SaleaeTime
@@ -22,6 +24,7 @@ from lib.pattern_tokenizer import Tokenizer
 from lib.pattern_parser import Parser
 from lib.byte_formatter import ByteFormatter
 from lib.errors import SourceError, CustomException
+from lib.data_extractor import InputAnalyzerType, extract_datum_from_frame
 
 @dataclass
 class PatternMatchCandidate:
@@ -30,7 +33,7 @@ class PatternMatchCandidate:
     start_time: SaleaeTime
 
 class CustomDataAnalyzer(HighLevelAnalyzer):
-    input_analyzer_type = ChoicesSetting(label="Input Analyzer Type", choices=("Async Serial", "SPI (use MOSI)", "SPI (use MISO)"))
+    input_analyzer_type = ChoicesSetting(label="Input Analyzer Type", choices=[t.value for t in InputAnalyzerType])
     source_setting = ChoicesSetting(label="Pattern Source", choices=("Text", "File"))
     pattern_setting = StringSetting(label="Pattern or File Path")
 
@@ -91,7 +94,7 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
         '''
 
         # Find datum
-        datum = self.get_datum(frame)
+        datum = extract_datum_from_frame(self.input_analyzer_type, frame)
         if datum is None:
             return
         
@@ -147,22 +150,5 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
 
             return AnalyzerFrame(ty, matching_candidate.start_time, frame.end_time, data)
 
-    def get_datum(self, frame: AnalyzerFrame) -> Optional[bytes]:
-        """Extract relevant datum given a frame, based on the `Input Analyzer Type` setting.
-        Returns `None` if this frame is valid but contains no data."""
-
-        try:
-            if self.input_analyzer_type == "Async Serial":
-                return frame.data["data"]
-            elif self.input_analyzer_type == "SPI (use MOSI)":
-                if frame.type == "result":
-                    return frame.data["mosi"]
-            elif self.input_analyzer_type == "SPI (use MISO)":
-                if frame.type == "result":
-                    return frame.data["miso"]
-            else:
-                raise ValueError(f"unknown input type '{self.input_analyzer_type}'")
-        except KeyError as e:
-            raise CustomException.from_analyzer_data_error(e, frame.data, self.input_analyzer_type)
 
     
