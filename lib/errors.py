@@ -75,6 +75,12 @@ class CustomException(Exception):
         message = f"Syntax error in pattern {input_name} {position_desc} - {error.explain()}"
 
         return CustomException(message)
+    
+    @staticmethod
+    def from_analyzer_data_error(e: KeyError, data: dict, input_analyzer_type: str) -> "CustomException":
+        """Creates a `CustomException` when input data could not be processed."""
+
+        return CustomException(f"Could not read data from analyzer. You have selected the analyzer type '{input_analyzer_type}', double-check this is correct. (Details: missing {e} on {data})")
 
     def __str__(self):
         return self.message

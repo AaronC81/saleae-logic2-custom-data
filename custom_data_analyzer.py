@@ -30,7 +30,8 @@ class PatternMatchCandidate:
     start_time: SaleaeTime
 
 class CustomDataAnalyzer(HighLevelAnalyzer):
-    source_setting = ChoicesSetting(label="Source", choices=("Text", "File"))
+    input_analyzer_type = ChoicesSetting(label="Input Analyzer Type", choices=("Async Serial", "SPI (use MOSI)", "SPI (use MISO)"))
+    source_setting = ChoicesSetting(label="Pattern Source", choices=("Text", "File"))
     pattern_setting = StringSetting(label="Pattern or File Path")
 
     # An optional list of types this analyzer produces, providing a way to customize the way frames are displayed in Logic 2.
@@ -90,17 +91,10 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
         '''
 
         # Find datum
-        # TODO: this is a bit naff, need a proper way!
-        if 'data' in frame.data:
-            # Async Serial
-            datum = frame.data['data']
-        elif 'mosi' in frame.data:
-            # SPI
-            # TODO: enable choosing between MOSI/MISO
-            datum = frame.data['mosi']
-        else:
+        datum = self.get_datum(frame)
+        if datum is None:
             return
-
+        
         # Create a new candidate for each pattern template
         self.candidates.extend(
             PatternMatchCandidate(pattern=p.copy_element(), env=PatternMatchEnvironment(), start_time=frame.start_time)
@@ -152,3 +146,23 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
                 ty, data = "unnamed", {}
 
             return AnalyzerFrame(ty, matching_candidate.start_time, frame.end_time, data)
+
+    def get_datum(self, frame: AnalyzerFrame) -> Optional[bytes]:
+        """Extract relevant datum given a frame, based on the `Input Analyzer Type` setting.
+        Returns `None` if this frame is valid but contains no data."""
+
+        try:
+            if self.input_analyzer_type == "Async Serial":
+                return frame.data["data"]
+            elif self.input_analyzer_type == "SPI (use MOSI)":
+                if frame.type == "result":
+                    return frame.data["mosi"]
+            elif self.input_analyzer_type == "SPI (use MISO)":
+                if frame.type == "result":
+                    return frame.data["miso"]
+            else:
+                raise ValueError(f"unknown input type '{self.input_analyzer_type}'")
+        except KeyError as e:
+            raise CustomException.from_analyzer_data_error(e, frame.data, self.input_analyzer_type)
+
+    
