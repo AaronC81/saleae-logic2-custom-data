@@ -3,7 +3,7 @@
   "apiVersion": "1.0.0",
   "author": "Aaron Christiansen",
   "version": "0.0.1",
-  "description": "Describe and annotate custom commands and data patterns",
+  "description": "Describe and annotate custom data patterns",
   "extensions": {
     "CustomData": {
       "type": "HighLevelAnalyzer",
