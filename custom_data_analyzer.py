@@ -31,7 +31,7 @@ class PatternMatchCandidate:
 
 class CustomDataAnalyzer(HighLevelAnalyzer):
     source_setting = ChoicesSetting(label="Source", choices=("Text", "File"))
-    pattern_setting = StringSetting(label="Pattern (or file path)")
+    pattern_setting = StringSetting(label="Pattern or File Path")
 
     # An optional list of types this analyzer produces, providing a way to customize the way frames are displayed in Logic 2.
     result_types = {
