@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from typing import no_type_check
 
 @dataclass
 class Token(ABC):
@@ -24,17 +25,15 @@ class QuotedStringToken(Token):
     def explain(self) -> str:
         return self.contents
     
-# Fancy metaclass shenanigans to avoid taking up loads of space with tiny `explain` implementations
-class CharTokenMeta(type(Token)):
-    def __new__(cls, name, bases, dct, /, char = None):
-        klass = super().__new__(cls, name, bases, dct)
-        klass.explain = lambda _: char
-        return klass
-class CharToken(Token, metaclass=CharTokenMeta): pass
-
-class SemicolonToken(CharToken, char=";"): pass
-class EqualsToken(CharToken, char="="): pass
-class DotToken(CharToken, char="."): pass
-class ColonToken(CharToken, char=":"): pass
-class LParenToken(CharToken, char="("): pass
-class RParenToken(CharToken, char=")"): pass
+class SemicolonToken(Token):
+    def explain(self) -> str: return ";"
+class EqualsToken(Token):
+    def explain(self) -> str: return "="
+class DotToken(Token):
+    def explain(self) -> str: return "."
+class ColonToken(Token):
+    def explain(self) -> str: return ":"
+class LParenToken(Token):
+    def explain(self) -> str: return "("
+class RParenToken(Token):
+    def explain(self) -> str: return ")"
