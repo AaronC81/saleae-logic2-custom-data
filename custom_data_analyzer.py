@@ -111,11 +111,26 @@ class CustomDataAnalyzer(HighLevelAnalyzer):
                 pass
 
         if any(matches):
-            # Find the "longest" match, and create a frame for that one.
-            # (Discard the other matches, if they existed.)
+            # Find the "longest" match
             # TODO: more control over what to do?
             matching_candidate = min(matches, key=lambda match: match.start_time)
 
+            # Discard other candidates.
+            # The one we just matched is marked with ~, others with -.
+            # None of these are allowed:
+            #  
+            #      |~~~~|           |~~~~|          |~~~~|
+            #        |---         |-------               |
+            #
+            # This isn't possible (because the match just ended, so we'd have to time-travel)
+            #
+            #      |~~~~|
+            #   |-----|
+            #
+            # That covers all possibilities, so empty the candidate list.
+            self.candidates.clear()
+
+            # Create our frame with a formatted message
             if isinstance(matching_candidate.pattern, NamePatternElement):
                 format_captures = { k: ByteFormatter(data=v) for k, v in matching_candidate.env.captures.items() }
                 text = matching_candidate.pattern.name.format(**format_captures)
