@@ -10,10 +10,10 @@ Custom Data uses a [custom language](#pattern-reference) to describe and annotat
 example, you could write patterns to describe the protocol of an (imaginary) display:
 
 ```
-"Reset" = fa ;
-"Set Pixel: {r}, {g}, {b}" = fd r:. g:. b:. ;
-"Set X Pos: {xPos:B}" = fb xPos:(..) ;
-"Set Y Pos: {yPos:B}" = fc yPos:(..) ;
+"Reset" = xFA ;
+"Set Pixel: {r}, {g}, {b}" = xFD r:. g:. b:. ;
+"Set X Pos: {xPos:B}" = xFB xPos:(..) ;
+"Set Y Pos: {yPos:B}" = xFC yPos:(..) ;
 ```
 
 Quick patterns can be added as a one-off string, or longer patterns for complex protocols can be
@@ -24,9 +24,9 @@ loaded from files for re-use across many sessions.
 Let's annotate some data in an SPI capture, from the MOSI side.
 
 To start simple, we'll annotate the fixed four-byte sequence `0x70, 0x71, 0x72, 0x73`, by adding a
-`CustomData` analyzer and entering the pattern `70 71 72 73`:
+`CustomData` analyzer and entering the pattern `x70 x71 x72 x73`:
 
-![The Analyzer Settings window, showing the pattern "70 71 72 73" entered.](img/settings.png)
+![The Analyzer Settings window, showing the pattern "x70 x71 x72 x73" entered.](img/settings.png)
 
 This creates an annotation on the relevant data:
 
@@ -35,14 +35,14 @@ This creates an annotation on the relevant data:
 However, we've not assigned a name to this pattern, so it currently shows as `(unnamed)`, which
 isn't too useful.
 
-We can assign a name using `"Foo" = 70 71 72 73`:
+We can assign a name using `"Foo" = x70 x71 x72 x73`:
 
 ![The same capture, but with the annotation showing "Foo" instead.](img/steps_2_named.png)
 
 Let's make the pattern more flexible, by pretending that in reality, this is a command-based format
 where `0x70, 0x71` is the command, and the following two bytes are data.
 
-Replacing the last two bytes with a wildcard `.` gives `"Foo" = 70 71 ..`, and the result does not
+Replacing the last two bytes with a wildcard `.` gives `"Foo" = x70 x71 ..`, and the result does not
 change. Great!
 
 But what if we'd like to see that data on the annotation?
@@ -52,7 +52,7 @@ syntax. Because `..` is really two separate wildcard patterns, we'll need to wra
 parentheses to capture both of them. Also, we can pretend that those two data bytes represent a
 little endian integer, and use the `L` format specifier to convert for us.
 
-This gives the pattern `"Foo: {data:L}" = 70 71 data:(..)`, which results in...
+This gives the pattern `"Foo: {data:L}" = x70 x71 data:(..)`, which results in...
 
 ![The same capture, but with the annotation showing "Foo 29554" instead.](img/steps_3_capture.png)
 
@@ -60,7 +60,10 @@ This gives the pattern `"Foo: {data:L}" = 70 71 data:(..)`, which results in...
 
 ### Basics
 
-- **Fixed bytes:** Match particular bytes by writing them in hexadecimal: `7a 1b`
+- **Fixed bytes:** Match particular bytes by writing them out: `x7A x1B`
+  - Supported formats are hexadecimal (`x`), decimal (`d`), and binary (`b`)
+  - The base can be specified using the form `xAA`, `AAx`, or `0xAA` - whichever you prefer
+  - `0` is special, and doesn't need a base
 - **Wildcards:** Match any one byte with `.`
 - **Grouping:** Treat a sequence of elements as one by wrapping them in parentheses. This isn't too
   useful on its own, but comes in handy for capturing multiple bytes.
@@ -77,8 +80,8 @@ Captured data can be interpolated into a name using standard Python formatting s
 
 The following formatting specifiers (usable with e.g. `{x:L}`) are supported:
 
-- _Nothing_: Render as packed hex: `abcdef1234`
-- `S`: Render as **s**paced hex: `ab cd ef 12 34`
+- _Nothing_: Render as packed hex: `xABCDEF1234`
+- `S`: Render as **s**paced hex: `xAB xCD xEF x12 x34`
 - `L`: Interpret bytes as an unsigned **l**ittle-endian integer
 - `B`: Interpret bytes as an unsigned **b**ig-endian integer
 
