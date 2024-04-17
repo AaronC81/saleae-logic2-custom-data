@@ -16,6 +16,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      path: saleae_logic2_custom_data
     - name: Set up Python 3.8
       uses: actions/setup-python@v3
       with:
