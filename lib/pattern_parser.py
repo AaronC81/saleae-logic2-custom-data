@@ -1,7 +1,7 @@
 from .pattern_tokenizer import *
 from .pattern_element import PatternElement, SequencePatternElement, NamePatternElement, FixedPatternElement, WildcardPatternElement, CapturePatternElement
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 from .errors import *
 from .pattern_tokens import *
 
@@ -87,15 +87,48 @@ class Parser:
             raise UnexpectedTokenError(token=token, position=token.position)
     
     def datum_contents_to_bytes(self, token: DatumToken) -> bytes:
+        """Converts a `DatumToken` into the bytes which that datum should match."""
+
+        base, value = self.datum_extract_base_and_value(token)
+
         try:
-            numeric = int(token.contents, 16)
+            numeric = int(value, base)
         except ValueError:
-            raise InvalidDatumError(reason=f"data values must be hexadecimal strings, not `{token.contents}`", position=token.position)
+            raise InvalidDatumError(reason=f"data value expected to be in base {base}, but `{value}` is not", position=token.position)
         
         if numeric < 0 or numeric > 0xFF:
-            raise InvalidDatumError(reason=f"data values must be bytes (00-ff), `{token.contents}` is out-of-range", position=token.position)
+            raise InvalidDatumError(reason=f"data values must be bytes, `{token.contents}` is out-of-range", position=token.position)
         
         return bytes([numeric])
+    
+    def datum_extract_base_and_value(self, token: DatumToken) -> Tuple[int, str]:
+        """
+        Gets the base and value for a `DatumToken`.
+        For example, "0x1A" gives `(16, "1A")`.
+
+        Throws an `InvalidDatumError` if the token's contents do not match any of the expected
+        formats or bases.
+        """
+
+        contents = token.contents
+
+        # If this is just zeroes, return now
+        if all(c == '0' for c in contents):
+            return (10, "0")
+
+        # Trim off any leading 0 to remove `0x00` from being something we need to explicitly
+        # consider. (It'll become the same as `x00`.)
+        if contents[0] == '0':
+            contents = contents[1:]
+
+        # Find a base at the start or end
+        bases = { "x": 16, "d": 10, "b": 2 }
+        if contents[0] in bases:
+            return (bases[contents[0]], contents[1:])
+        elif contents[-1] in bases:
+            return (bases[contents[-1]], contents[:-1])
+        else:
+            raise InvalidDatumError(reason=f"cannot find base specifier (`x`, `b`, or `d`) on data value `{token.contents}`", position=token.position)
 
     def is_at_end(self) -> bool:
         return self.current_position >= len(self.input)

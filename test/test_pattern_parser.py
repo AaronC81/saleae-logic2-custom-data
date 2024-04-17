@@ -65,22 +65,22 @@ def test_parse_subpattern():
 
 def test_parse_number_styles():
     # Hex
-    assert parse("xAB")  == SequencePatternElement([FixedPatternElement(b"\xAB")])
-    assert parse("0xAB") == SequencePatternElement([FixedPatternElement(b"\xAB")])
-    assert parse("ABx")  == SequencePatternElement([FixedPatternElement(b"\xAB")])
+    assert parse("xAB")  == [SequencePatternElement([FixedPatternElement(b"\xAB")])]
+    assert parse("0xAB") == [SequencePatternElement([FixedPatternElement(b"\xAB")])]
+    assert parse("ABx")  == [SequencePatternElement([FixedPatternElement(b"\xAB")])]
 
     # Decimal
-    assert parse("d16")  == SequencePatternElement([FixedPatternElement(b"\x10")])
-    assert parse("0d16") == SequencePatternElement([FixedPatternElement(b"\x10")])
-    assert parse("16d")  == SequencePatternElement([FixedPatternElement(b"\x10")])
+    assert parse("d16")  == [SequencePatternElement([FixedPatternElement(b"\x10")])]
+    assert parse("0d16") == [SequencePatternElement([FixedPatternElement(b"\x10")])]
+    assert parse("16d")  == [SequencePatternElement([FixedPatternElement(b"\x10")])]
 
     # Binary
-    assert parse("b100")  == SequencePatternElement([FixedPatternElement(b"\x04")])
-    assert parse("0b100") == SequencePatternElement([FixedPatternElement(b"\x04")])
-    assert parse("100b")  == SequencePatternElement([FixedPatternElement(b"\x04")])
+    assert parse("b100")  == [SequencePatternElement([FixedPatternElement(b"\x04")])]
+    assert parse("0b100") == [SequencePatternElement([FixedPatternElement(b"\x04")])]
+    assert parse("100b")  == [SequencePatternElement([FixedPatternElement(b"\x04")])]
 
     # Special case - zero doesn't need a base
-    assert parse("0") == SequencePatternElement([FixedPatternElement(b"\0")])
+    assert parse("0") == [SequencePatternElement([FixedPatternElement(b"\0")])]
 
     # But other numbers do
     with pytest.raises(InvalidDatumError):
