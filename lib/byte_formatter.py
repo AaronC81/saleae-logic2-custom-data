@@ -12,13 +12,13 @@ class ByteFormatter:
 
         if spec == "":
             # By default, render as a "packed" hexadecimal sequence:
-            #   abcdef1234
-            return self.data.hex()
+            #   xABCDEF1234
+            return f"x{self.data.hex().upper()}"
 
         elif spec == "s":
             # Render the string with *s*pacing
-            #   ab cd ef 12 34
-            return self.data.hex(" ")
+            #   xAB xCD xEF x12 x34
+            return " ".join(f"x{x:02X}" for x in self.data)
         
         elif spec == "L":
             # Interpret the string as a *l*ittle-endian integer
