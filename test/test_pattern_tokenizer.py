@@ -26,3 +26,12 @@ def test_unknown():
 def test_unterminated_string():
     with pytest.raises(UnterminatedQuotedStringError):
         Tokenizer("\"ABC = ab ;").tokenize()
+
+def test_comments():
+    assert Tokenizer(
+        "ab // some comment here...\n" +
+        "cd // More stuff"
+    ).tokenize() == [
+        DatumToken(contents="ab", position=range(0, 2)),
+        DatumToken(contents="cd", position=range(27, 29)),
+    ]

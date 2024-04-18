@@ -54,6 +54,11 @@
 				}
 			]
 		},
+        "comments": {
+			"name": "comment.line.double-slash.saleae-logic2-custom-data",
+			"begin": "//",
+			"end": "$"
+		},
 		"identifiers": {
 			"name": "entity.name.saleae-logic2-custom-data",
 			"match": "\\b([a-z_][a-zA-Z0-9_]*)"

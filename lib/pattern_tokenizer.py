@@ -18,6 +18,17 @@ class Tokenizer:
 
             start_pos = self.current_position
 
+            # Comments
+            if self.take_if("/"):
+                if self.is_at_end() or self.here() != "/":
+                    raise UnexpectedCharacterError(char=self.here(), position=self.range_to_here_from(start_pos))
+
+                # Consume all characters up until a newline (or the end of the file)
+                while not self.is_at_end() and self.here() != "\n":
+                    self.take()
+                continue # Restart
+
+            # Simple characters
             if self.take_if(";"):
                 tokens.append(SemicolonToken(position=self.range_to_here_from(start_pos)))
             elif self.take_if("="):
@@ -33,13 +44,14 @@ class Tokenizer:
             elif self.take_if(")"):
                 tokens.append(RParenToken(position=self.range_to_here_from(start_pos)))
 
-
+            # Literal bytes or identifiers
             elif self.here().isalnum():
                 buffer = ""
                 while not self.is_at_end() and (self.here().isalnum() or self.here() == '_'):
                     buffer += self.take()
                 tokens.append(DatumToken(contents=buffer, position=self.range_to_here_from(start_pos)))
 
+            # Labels
             elif self.take_if("\""):
                 buffer = ""
                 while not self.is_at_end() and self.here() != "\"":

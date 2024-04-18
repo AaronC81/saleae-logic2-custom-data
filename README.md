@@ -60,6 +60,7 @@ This gives the pattern `"Foo: {data:L}" = x70 x71 data:(..)`, which results in..
 
 ### Basics
 
+- **Comments:** Line comments are supported using `//`
 - **Fixed bytes:** Match particular bytes by writing them out: `x7A x1B`
   - Supported formats are hexadecimal (`x`), decimal (`d`), and binary (`b`)
   - The base can be specified using the form `xAA`, `AAx`, or `0xAA` - whichever you prefer
