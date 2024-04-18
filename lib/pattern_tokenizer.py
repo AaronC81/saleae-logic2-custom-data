@@ -26,6 +26,8 @@ class Tokenizer:
                 tokens.append(DotToken(position=self.range_to_here_from(start_pos)))
             elif self.take_if(":"):
                 tokens.append(ColonToken(position=self.range_to_here_from(start_pos)))
+            elif self.take_if("*"):
+                tokens.append(StarToken(position=self.range_to_here_from(start_pos)))
             elif self.take_if("("):
                 tokens.append(LParenToken(position=self.range_to_here_from(start_pos)))
             elif self.take_if(")"):

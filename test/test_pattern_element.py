@@ -62,5 +62,19 @@ def test_start_hint():
     ]).start_hint() == [b"\x01"]
     assert WildcardPatternElement().start_hint() == None
 
+def test_repeat():
+    seq = SequencePatternElement([
+        FixedPatternElement(b"\x01"),
+        RepeatPatternElement(FixedPatternElement(b"\x02"), 4),
+        FixedPatternElement(b"\x03"),
+    ])
+
+    assert seq.match(b"\x01", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x02", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x02", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x02", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x02", env()) == PatternMatchResult.NEED_MORE
+    assert seq.match(b"\x03", env()) == PatternMatchResult.SUCCESS
+
 def env() -> PatternMatchEnvironment:
     return PatternMatchEnvironment()

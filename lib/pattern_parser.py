@@ -1,5 +1,5 @@
 from .pattern_tokenizer import *
-from .pattern_element import PatternElement, SequencePatternElement, NamePatternElement, FixedPatternElement, WildcardPatternElement, CapturePatternElement
+from .pattern_element import PatternElement, SequencePatternElement, NamePatternElement, FixedPatternElement, WildcardPatternElement, CapturePatternElement, RepeatPatternElement
 from dataclasses import dataclass
 from typing import List, Tuple
 from .errors import *
@@ -64,13 +64,21 @@ class Parser:
         if isinstance(token, DatumToken):
             self.take()
 
-            # This might be a capture, if it's of the form `x:...` rather than just `x`
+            # This might be a capture, if it's of the form `x:...`
             if not self.is_at_end() and isinstance(self.here(), ColonToken):
                 self.take()
                 captured_pattern = self.parse_single_element()
                 return CapturePatternElement(token.contents, captured_pattern)
-
-            return FixedPatternElement(datum=self.datum_contents_to_bytes(token))
+            
+            datum = self.datum_contents_to_bytes(token)
+            
+            # This might be a repeat, if it's of the form `x*y`
+            if not self.is_at_end() and isinstance(self.here(), StarToken):
+                self.take()
+                repeated_pattern = self.parse_single_element()
+                return RepeatPatternElement(pattern_element=repeated_pattern, quantity=datum[0])
+            else:
+                return FixedPatternElement(datum=datum)
 
         elif isinstance(token, DotToken):
             self.take()

@@ -86,5 +86,27 @@ def test_parse_number_styles():
     with pytest.raises(InvalidDatumError):
         parse("4")
 
+def test_parse_repeat():
+    assert parse("d10*xAA") == [
+        SequencePatternElement([
+            RepeatPatternElement(
+                pattern_element=FixedPatternElement(b"\xAA"),
+                quantity=10,
+            )
+        ])
+    ]
+    assert parse("x12*(xAA xBB xCC)") == [
+        SequencePatternElement([
+            RepeatPatternElement(
+                pattern_element=SequencePatternElement([
+                    FixedPatternElement(b"\xAA"),
+                    FixedPatternElement(b"\xBB"),
+                    FixedPatternElement(b"\xCC"),
+                ]),
+                quantity=0x12,
+            )
+        ])
+    ]
+
 def parse(input: str):
     return Parser(Tokenizer(input).tokenize()).parse()

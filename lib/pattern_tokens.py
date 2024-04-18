@@ -33,6 +33,8 @@ class DotToken(Token):
     def explain(self) -> str: return "."
 class ColonToken(Token):
     def explain(self) -> str: return ":"
+class StarToken(Token):
+    def explain(self) -> str: return "*"
 class LParenToken(Token):
     def explain(self) -> str: return "("
 class RParenToken(Token):

@@ -41,6 +41,10 @@ class PatternElement(ABC):
         Capturing pattern elements may modify the `env` *if and only if* the match returns
         `PatternMatchResult.SUCCESS`. Matches shouldn't be modified incrementally, to prevent
         clashes between multiple concurrent match candidates.
+
+        This can be implemented assuming that, once `PatternMatchResult.SUCCESS` or
+        `PatternMatchResult.FAILURE` has been returned, `match` won't be called again before `reset`
+        is called.
         """
         ...
 
@@ -188,3 +192,38 @@ class CapturePatternElement(PatternElement):
     def start_hint(self) -> Optional[List[bytes]]:
         return self.pattern_element.start_hint()
         
+@dataclass
+class RepeatPatternElement(PatternElement):
+    """A pattern element which captures a given number of repeats of the matched data."""
+
+    pattern_element: PatternElement
+    quantity: int
+    quantity_seen_so_far: int = 0
+
+    def reset(self) -> None:
+        self.quantity_seen_so_far = 0
+        self.pattern_element.reset()
+
+    def match(self, datum: bytes, env: PatternMatchEnvironment) -> PatternMatchResult:
+        result = self.pattern_element.match(datum, env)
+        if result == PatternMatchResult.SUCCESS:
+            # Move onto the next "iteration" of this same pattern
+            self.quantity_seen_so_far += 1
+            self.pattern_element.reset()
+
+            # If we've hit the desired quantity, this is a match too!
+            if self.quantity_seen_so_far == self.quantity:
+                return PatternMatchResult.SUCCESS
+            
+            return PatternMatchResult.NEED_MORE
+        
+        elif result == PatternMatchResult.FAILURE:
+            # This is a failure too
+            return PatternMatchResult.FAILURE
+        
+        elif result == PatternMatchResult.NEED_MORE:
+            # Our current pattern needs more data, so we do too
+            return PatternMatchResult.NEED_MORE
+
+    def start_hint(self) -> Optional[List[bytes]]:
+        return self.pattern_element.start_hint()
