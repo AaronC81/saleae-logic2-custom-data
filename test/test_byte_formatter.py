@@ -1,3 +1,5 @@
+# type: ignore
+
 from ..lib.byte_formatter import ByteFormatter
 
 def test_default_format():

@@ -1,3 +1,5 @@
+# type: ignore
+
 from ..lib.pattern_parser import *
 from ..lib.pattern_element import *
 from ..lib.errors import InvalidDatumError

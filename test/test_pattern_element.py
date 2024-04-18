@@ -1,3 +1,5 @@
+# type: ignore
+
 from ..lib.pattern_element import *
 
 def test_fixed():

@@ -1,3 +1,5 @@
+# type: ignore
+
 import pytest
 from ..lib.pattern_tokenizer import *
 
