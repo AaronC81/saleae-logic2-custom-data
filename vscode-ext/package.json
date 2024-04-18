@@ -1,0 +1,34 @@
+{
+    "name": "saleae-logic2-custom-data",
+    "displayName": "Saleae Logic2 Custom Data",
+    "description": "Language support for Custom Data HLA patterns",
+    "publisher": "aaronc81",
+    "author": {
+        "name": "Aaron Christiansen",
+        "email": "aaronc20000@gmail.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/AaronC81/saleae-logic2-custom-data"
+    },
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.73.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "saleae-logic2-custom-data",
+            "aliases": ["Saleae Logic2 Custom Data"],
+            "extensions": [".cdpat", ".cdpatt", ".cdpattern"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "saleae-logic2-custom-data",
+            "scopeName": "source.saleae-logic2-custom-data",
+            "path": "./syntaxes/saleae-logic2-custom-data.tmLanguage.json"
+        }]
+    }
+}

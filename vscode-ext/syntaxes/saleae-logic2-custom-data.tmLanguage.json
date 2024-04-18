@@ -1,0 +1,63 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Saleae Logic2 Custom Data",
+	"patterns": [
+		{ "include": "#literals" },
+		{ "include": "#strings" },
+		{ "include": "#comments" },
+		{ "include": "#identifiers" }
+	],
+	"repository": {
+		"literals": {
+			"patterns": [
+				{
+					"name": "constant.numeric.saleae-logic2-custom-data.pre",
+					"match": "\\b0?x([a-fA-F0-9]+)\\b"
+				},
+                {
+					"name": "constant.numeric.saleae-logic2-custom-data.post",
+					"match": "\\b([a-fA-F0-9]+)x\\b"
+				},
+
+                {
+					"name": "constant.numeric.saleae-logic2-custom-data.bin-pre",
+					"match": "\\b0?b([01]+)\\b"
+				},
+                {
+					"name": "constant.numeric.saleae-logic2-custom-data.bin-post",
+					"match": "\\b([01]+)b\\b"
+				},
+
+                {
+					"name": "constant.numeric.saleae-logic2-custom-data.dec-pre",
+					"match": "\\b0?d([0-9]+)\\b"
+				},
+                {
+					"name": "constant.numeric.saleae-logic2-custom-data.dec-post",
+					"match": "\\b([0-9]+)d\\b"
+				},
+
+                {
+					"name": "constant.numeric.saleae-logic2-custom-data.zero",
+					"match": "\\b0\\b"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.saleae-logic2-custom-data",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.saleae-logic2-custom-data",
+					"match": "\\{[^}]+\\}"
+				}
+			]
+		},
+		"identifiers": {
+			"name": "entity.name.saleae-logic2-custom-data",
+			"match": "\\b([a-z_][a-zA-Z0-9_]*)"
+		}
+	},
+	"scopeName": "source.saleae-logic2-custom-data"
+}

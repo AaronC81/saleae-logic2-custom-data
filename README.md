@@ -108,6 +108,18 @@ The following formatting specifiers (usable with e.g. `{x:L}`) are supported:
 
 - Underlying protocols (e.g. Async Serial, SPI) must be individually supported, and few are yet!
 
+## Highlighting
+
+If you're writing long and complex patterns in a file, there's a Visual Studio Code extension
+which provide syntax highlighting in the `vscode-ext` directory.
+
+1. `npm install -g @vscode/vsce`
+2. `vsce package` to create a VSIX file
+3. _Extensions_ > ... > _Install from VSIX..._ and select it
+
+By default, files with the `.cdpat` or `.cdpattern` extensions are highlighted, but you can select
+the "Saleae Logic2 Custom Data" language to highlight any file.
+
 ## Development
 
 This follows the standard Saleae HLA template, with some notable additions:
