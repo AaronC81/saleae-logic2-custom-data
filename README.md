@@ -65,8 +65,13 @@ This gives the pattern `"Foo: {data:L}" = x70 x71 data:(..)`, which results in..
   - The base can be specified using the form `xAA`, `AAx`, or `0xAA` - whichever you prefer
   - `0` is special, and doesn't need a base
 - **Wildcards:** Match any one byte with `.`
+
+### Compounds
+
 - **Grouping:** Treat a sequence of elements as one by wrapping them in parentheses. This isn't too
-  useful on its own, but comes in handy for capturing multiple bytes.
+  useful on its own, but comes in handy when used with other pattern constructs.
+- **Repeats:** Use `n*p` to repeat the pattern `p` exactly `n` times, where `n` is a constant:
+  `eightBytes:(8d*.)`
 
 ### Naming and Captures
 
