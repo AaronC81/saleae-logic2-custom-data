@@ -1,6 +1,5 @@
-from enum import Enum
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional, Tuple, Dict, cast
 from dataclasses import dataclass, field
 import copy
 
@@ -11,17 +10,26 @@ class PatternMatchEnvironment:
     def add_capture(self, name: str, data: bytes) -> None:
         self.captures[name] = data
 
-class PatternMatchResult(Enum):
-    # The provided data is not a match for this pattern.
-    FAILURE = 0
+class PatternMatchResult:
+    # Work around https://bugs.python.org/issue30545 by defining something enum-like manually,
+    # except which implements value-equality.
 
-    # The provided data is a match for this pattern. If there is another pattern subsequent to this
-    # one, send future data to that instead.
-    SUCCESS = 1
+    SUCCESS: "PatternMatchResult"
+    FAILURE: "PatternMatchResult"
+    NEED_MORE: "PatternMatchResult"
 
-    # This pattern has matched so far, but matching isn't complete. The next datum should be
-    # received by this pattern, to work towards determining whether this is a match or not.
-    NEED_MORE = 2
+    _value: str
+
+    def __init__(self, value: str) -> None:
+        self._value = value
+    
+    def __eq__(self, other: object) -> bool:
+        # `isinstance` is module-sensitive, so use a worse approach
+        return type(other).__name__ == "PatternMatchResult" and self._value == cast(PatternMatchResult, other)._value
+    
+PatternMatchResult.SUCCESS   = PatternMatchResult("SUCCESS")
+PatternMatchResult.FAILURE   = PatternMatchResult("FAILURE")
+PatternMatchResult.NEED_MORE = PatternMatchResult("NEED_MORE")
 
 class PatternElement(ABC):
     """An abstract class describing how one datum of a packet should be matched."""
@@ -224,6 +232,9 @@ class RepeatPatternElement(PatternElement):
         elif result == PatternMatchResult.NEED_MORE:
             # Our current pattern needs more data, so we do too
             return PatternMatchResult.NEED_MORE
+        
+        else:
+            raise ValueError("unknown result from inner pattern")
 
     def start_hint(self) -> Optional[List[bytes]]:
         return self.pattern_element.start_hint()
