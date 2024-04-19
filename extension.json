@@ -2,7 +2,7 @@
   "name": "Custom Data",
   "apiVersion": "1.0.0",
   "author": "Aaron Christiansen",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Describe and annotate custom data patterns",
   "extensions": {
     "CustomData": {
